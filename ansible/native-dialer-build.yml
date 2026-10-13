@@ -9,6 +9,29 @@
   ansible.builtin.apt:
     name: openjdk-17-jdk-headless
     state: present
+- name: Provision managed Android SDK and Gradle directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ afric_user }}"
+    group: "{{ afric_user }}"
+    mode: '0755'
+  loop: ["{{ native_android_sdk }}", "{{ native_gradle_path | dirname | dirname | dirname }}"]
+  when: provision_native_build_tools
+- name: Install verified native build-tool archives and Android compile packages
+  ansible.builtin.command:
+    argv: [python3, "{{ afric_root }}/project/scripts/bootstrap-native-tools.py", --sdk, "{{ native_android_sdk }}", --gradle-parent, "{{ native_gradle_path | dirname | dirname | dirname }}", --accept-sdk-licenses]
+  environment:
+    JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+  become_user: "{{ afric_user }}"
+  async: 3600
+  poll: 30
+  when: provision_native_build_tools
+- name: Use managed SDK analyzer and signer for built APK validation
+  ansible.builtin.set_fact:
+    apk_analyzer_path: "{{ native_android_sdk }}/cmdline-tools/latest/bin/apkanalyzer"
+    apk_signer_path: "{{ native_android_sdk }}/build-tools/35.0.0/apksigner"
+  when: provision_native_build_tools
 - name: Compile customized native Olamide SIP APK
   ansible.builtin.command:
     argv: ["{{ native_gradle_path }}", --no-daemon, ':app:assembleDebug']

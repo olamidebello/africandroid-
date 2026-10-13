@@ -62,3 +62,5 @@ Configure the optional `olamide-dialer.yml` inputs only after a signed native di
 ## Build the customized native SIP dialer
 
 Set `build_native_dialer: true` to run `native-dialer-build.yml` before the OS build. Configure JDK 17-compatible Gradle 8.13 and Android SDK platform/build-tools 35 paths. The task compiles a debug APK, computes its checksum, passes it to preload validation, and pins its signing certificate for profile handoff. Runtime credentials are entered and encrypted locally by the owner; Ansible does not provision passwords. See [SIP profile controls](../docs/SIP-PROFILES.md).
+
+When native building is enabled, `provision_native_build_tools: true` installs checksum-verified Gradle 8.13 and official Android command-line tools 16.0, accepts SDK licenses for that build host, and installs platform/build-tools 35. Managed defaults live under the dedicated AfricAndroid build directory. Set this flag false to supply already-provisioned tools. SDK/profile/call behavior still needs runtime verification.

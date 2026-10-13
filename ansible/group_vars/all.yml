@@ -33,5 +33,6 @@ apk_signer_path: /opt/android-sdk/build-tools/35.0.0/apksigner
 
 # Build the repository's customized native dialer before optional OS preload.
 build_native_dialer: false
-native_android_sdk: /opt/android-sdk
-native_gradle_path: /opt/gradle-8.13/bin/gradle
+native_android_sdk: "{{ afric_root }}/android-sdk"
+native_gradle_path: "{{ afric_root }}/native-tools/gradle-8.13/bin/gradle"
+provision_native_build_tools: true
