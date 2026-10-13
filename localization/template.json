@@ -52,6 +52,12 @@
     "auth_subtitle": "Authenticate to perform this action",
     "auth_denied": "Authentication cancelled or unavailable. Action blocked.",
     "auth_retry": "Authentication did not match. Try again.",
-    "biometric_enroll": "Enroll fingerprint or face"
+    "biometric_enroll": "Enroll fingerprint or face",
+    "restore_brand_wallpaper": "Restore AfricAndroid wallpaper",
+    "brand_artwork": "AfricAndroid Africa circuit logo and slogan",
+    "afric_slogan": "...the home of the blacks",
+    "region_time": "Region, date and time",
+    "keyboard_settings": "Keyboards and writing systems",
+    "languages_shortcut": "Languages"
   }
 }

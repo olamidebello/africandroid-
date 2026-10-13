@@ -67,3 +67,9 @@ See [Ansible deployment](ansible/README.md) for host provisioning, full AOSP bui
 ## Owner authentication
 
 Protected launcher/customizer actions require fresh Android strong-biometric or device-credential authentication. Enrollment and control use local Android settings, with no remote management dependency. See [authentication scope and hardware requirements](docs/AUTHENTICATION.md). This is app-level enforcement; system-wide event authentication remains unimplemented.
+
+## Official artwork and default wallpaper
+
+The supplied Africa circuit logo, AfricAndroid wordmark, and original slogan are preserved together in the original image. It is used for the app icon, customization header, launcher background, and factory default home/lock wallpaper configuration. The launcher displays the whole artwork with aspect ratio preserved against black; Android system wallpaper cropping varies by screen and requires runtime verification. Users can change wallpapers and restore the branded home wallpaper through the authenticated customization action. Rebuilding does not force-reset an existing user's wallpaper. The artwork is user-provided branding; the source-code Apache license does not grant third-party trademark rights.
+
+The launcher and customization screens now share a forest-green, gold and black theme, the original Africa artwork and slogan, gold-bordered touch controls, and language/keyboard/region settings access. Styling applies to these AfricAndroid apps; inherited Android SystemUI and third-party applications retain their own themes. African language entries represent a diverse continent and are not a claim of translated menus for every language.

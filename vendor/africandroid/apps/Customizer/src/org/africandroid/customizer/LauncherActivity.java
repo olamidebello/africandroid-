@@ -12,6 +12,8 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
@@ -43,8 +45,8 @@ public class LauncherActivity extends Activity {
         String profile = preferences.getString("profile", "Mobile");
         LinearLayout page = new LinearLayout(this); page.setOrientation(LinearLayout.VERTICAL);
         int padding = (int)(16 * getResources().getDisplayMetrics().density);
-        page.setPadding(padding, padding, padding, padding); page.setBackgroundColor(0xffedf5ef);
-        TextView title = new TextView(this); title.setText(getString(R.string.workspace_title, profileLabel(profile))); title.setTextSize(28); title.setTextColor(0xff006b54); page.addView(title);
+        page.setPadding(padding, padding, padding, padding); page.setBackgroundColor(Color.TRANSPARENT);
+        TextView title = new TextView(this); title.setText(getString(R.string.workspace_title, profileLabel(profile))); title.setTextSize(28); title.setTextColor(0xffffd166); page.addView(title);
         Button profiles = new BiometricGate.GuardedButton(this, gate); profiles.setText(getString(R.string.choose_layout)); page.addView(profiles);
         profiles.setOnClickListener(v -> {
             String[] choices = {getString(R.string.profile_mobile), getString(R.string.profile_tablet), getString(R.string.profile_desktop)};
@@ -53,7 +55,7 @@ public class LauncherActivity extends Activity {
                 preferences.edit().putString("profile", ids[index]).apply(); query = ""; render();
             })).show();
         });
-        EditText search = new EditText(this); search.setHint(getString(R.string.search_apps)); page.addView(search);
+        EditText search = new EditText(this); search.setHint(getString(R.string.search_apps)); search.setTextColor(0xfffff3cf); search.setHintTextColor(0xffd6eadf); search.setBackgroundColor(0xe6032419); page.addView(search);
         ScrollView scroll = new ScrollView(this);
         grid = new GridLayout(this);
         int widthDp = getResources().getConfiguration().screenWidthDp;
@@ -62,10 +64,19 @@ public class LauncherActivity extends Activity {
         scroll.addView(grid); page.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout dock = new LinearLayout(this); dock.setOrientation(LinearLayout.HORIZONTAL);
         dockButton(dock, getString(R.string.files), new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE));
+        dockButton(dock, getString(R.string.languages_shortcut), new Intent(Settings.ACTION_LOCALE_SETTINGS));
         dockButton(dock, getString(R.string.settings), new Intent(Settings.ACTION_SETTINGS));
         dockButton(dock, getString(R.string.customize), new Intent(this, MainActivity.class));
         page.addView(dock);
-        setContentView(page);
+        FrameLayout workspace = new FrameLayout(this);
+        workspace.setBackgroundColor(Color.BLACK);
+        ImageView background = new ImageView(this);
+        background.setImageResource(R.drawable.africandroid_brand);
+        background.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        background.setImportantForAccessibility(android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        workspace.addView(background, new FrameLayout.LayoutParams(-1, -1));
+        workspace.addView(page, new FrameLayout.LayoutParams(-1, -1));
+        setContentView(workspace);
         search.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before, int count) { query = s.toString(); showApps(); }
@@ -97,7 +108,7 @@ public class LauncherActivity extends Activity {
             int iconSize = (int)(40 * getResources().getDisplayMetrics().density);
             icon.setBounds(0, 0, iconSize, iconSize); button.setCompoundDrawables(null, icon, null, null);
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width = 0; params.height = -2; params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            params.width = 0; params.height = -2; params.setMargins(4, 6, 4, 6); params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
             button.setLayoutParams(params); grid.addView(button);
             button.setOnClickListener(v -> launch(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
                 .setClassName(app.activityInfo.packageName, app.activityInfo.name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)));

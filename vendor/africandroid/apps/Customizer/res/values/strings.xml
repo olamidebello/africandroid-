@@ -49,4 +49,10 @@
   <string name="auth_denied">"Authentication cancelled or unavailable. Action blocked."</string>
   <string name="auth_retry">"Authentication did not match. Try again."</string>
   <string name="biometric_enroll">"Enroll fingerprint or face"</string>
+  <string name="restore_brand_wallpaper">"Restore AfricAndroid wallpaper"</string>
+  <string name="brand_artwork">"AfricAndroid Africa circuit logo and slogan"</string>
+  <string name="afric_slogan">"...the home of the blacks"</string>
+  <string name="region_time">"Region, date and time"</string>
+  <string name="keyboard_settings">"Keyboards and writing systems"</string>
+  <string name="languages_shortcut">"Languages"</string>
 </resources>

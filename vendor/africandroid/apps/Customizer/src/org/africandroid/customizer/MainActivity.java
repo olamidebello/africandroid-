@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -43,13 +44,28 @@ public class MainActivity extends Activity {
         panel.setOrientation(LinearLayout.VERTICAL);
         int pad = (int)(24 * getResources().getDisplayMetrics().density);
         panel.setPadding(pad, pad, pad, pad);
-        panel.setBackgroundColor(Color.rgb(244, 249, 246));
+        panel.setBackgroundColor(0xff031b13);
         scroll.addView(panel);
         setContentView(scroll);
+        ImageView logo = new ImageView(this);
+        logo.setImageResource(R.drawable.africandroid_brand);
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        logo.setBackgroundColor(Color.BLACK);
+        logo.setContentDescription(getString(R.string.brand_artwork));
+        panel.addView(logo, new LinearLayout.LayoutParams(-1, (int)(240 * getResources().getDisplayMetrics().density)));
         label(getString(R.string.brand), 32);
-        label(getString(R.string.tagline), 20);
+        label(getString(R.string.afric_slogan), 20);
+        label(getString(R.string.tagline), 16);
         label(getString(R.string.android_model, Build.VERSION.RELEASE, Build.MODEL), 14);
         label(getString(R.string.choose_wallpaper), 20);
+        button(getString(R.string.restore_brand_wallpaper)).setOnClickListener(v -> new Thread(() -> {
+            try {
+                WallpaperManager.getInstance(this).setResource(R.drawable.africandroid_brand);
+                runOnUiThread(() -> toast(getString(R.string.wallpaper_applied)));
+            } catch (IOException | SecurityException | IllegalArgumentException e) {
+                runOnUiThread(() -> toast(getString(R.string.wallpaper_failed)));
+            }
+        }).start());
         wallpaper(getString(R.string.wallpaper_forest), 0xff006b54, 0xffffd166);
         wallpaper(getString(R.string.wallpaper_ocean), 0xff101b3a, 0xff10b9bd);
         wallpaper(getString(R.string.wallpaper_sunset), 0xff9b352d, 0xfff3b568);
@@ -57,6 +73,8 @@ public class MainActivity extends Activity {
         label(getString(R.string.personalize), 20);
         settings(getString(R.string.display_settings), Settings.ACTION_DISPLAY_SETTINGS);
         settings(getString(R.string.language_keyboard), Settings.ACTION_LOCALE_SETTINGS);
+        settings(getString(R.string.region_time), Settings.ACTION_DATE_SETTINGS);
+        settings(getString(R.string.keyboard_settings), Settings.ACTION_INPUT_METHOD_SETTINGS);
         settings(getString(R.string.accessibility), Settings.ACTION_ACCESSIBILITY_SETTINGS);
         settings(getString(R.string.wifi), Settings.ACTION_WIFI_SETTINGS);
         settings(getString(R.string.apps_permissions), Settings.ACTION_APPLICATION_SETTINGS);
@@ -70,11 +88,11 @@ public class MainActivity extends Activity {
     private void label(String text, int size) {
         TextView view = new TextView(this);
         view.setText(text); view.setTextSize(size);
-        view.setTextColor(0xff12392f); view.setPadding(0, 16, 0, 16);
+        view.setTextColor(0xffffd166); view.setPadding(0, 16, 0, 16);
         panel.addView(view);
     }
     private Button button(String text) {
-        Button b = new BiometricGate.GuardedButton(this, gate); b.setText(text); panel.addView(b); return b;
+        Button b = new BiometricGate.GuardedButton(this, gate); b.setText(text); LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2); params.setMargins(0, 6, 0, 6); panel.addView(b, params); return b;
     }
     private void settings(String text, String action) {
         button(text).setOnClickListener(v -> {

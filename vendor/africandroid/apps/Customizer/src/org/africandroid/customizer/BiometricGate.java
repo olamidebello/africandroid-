@@ -64,7 +64,23 @@ final class BiometricGate {
     private void toast(int message) { Toast.makeText(activity, message, Toast.LENGTH_SHORT).show(); }
     static final class GuardedButton extends Button {
         private final BiometricGate gate;
-        GuardedButton(Activity activity, BiometricGate gate) { super(activity); this.gate = gate; }
+        GuardedButton(Activity activity, BiometricGate gate) {
+            super(activity); this.gate = gate;
+            setTextColor(0xffffd166);
+            setAllCaps(false);
+            float density = getResources().getDisplayMetrics().density;
+            setMinHeight((int)(52 * density));
+            android.graphics.drawable.StateListDrawable states = new android.graphics.drawable.StateListDrawable();
+            states.addState(new int[] {android.R.attr.state_pressed}, surface(0xff0a6146, density));
+            states.addState(new int[] {}, surface(0xe6043224, density));
+            setBackground(states);
+            int pad = (int)(12 * density); setPadding(pad, pad, pad, pad);
+        }
+        private android.graphics.drawable.GradientDrawable surface(int color, float density) {
+            android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
+            shape.setColor(color); shape.setCornerRadius(12 * density);
+            shape.setStroke((int)Math.max(1, density), 0xffb99441); return shape;
+        }
         @Override public void setOnClickListener(View.OnClickListener listener) {
             super.setOnClickListener(listener == null ? null : view -> gate.run(() -> listener.onClick(view)));
         }
