@@ -1,0 +1,11 @@
+name: Validate project sources
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/validate.py
+# Full AOSP builds need a separately provisioned host; GitHub-hosted CI is not used for OS builds.
