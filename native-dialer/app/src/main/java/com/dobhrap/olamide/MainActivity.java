@@ -43,13 +43,14 @@ public class MainActivity extends Activity {
     private SipEngineService engine(){SipEngineService s=SipEngineService.instance;if(s==null||s.core==null)throw new IllegalStateException();return s;}
     private org.linphone.core.Call active(){org.linphone.core.Call c=engine().core.getCurrentCall();if(c==null)throw new IllegalStateException();return c;}
     private void register(){
+        SipEngineService active=SipEngineService.instance;if(active!=null&&active.core!=null&&active.core.getCallsNb()>0){toast("Finish the active call before switching or registering profiles.");return;}
         if(checkSelfPermission(Manifest.permission.RECORD_AUDIO)!=PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO,Manifest.permission.CALL_PHONE},91);return;}
         if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},92);return;}
         String id=SipProfileStore.prefs(this).getString("default","");if(id.isEmpty()){toast("Select a default SIP profile.");return;}
         startForegroundService(new Intent(this,SipEngineService.class).putExtra("profile_id",id));
     }
     private void placeCall(){String digits=number.getText().toString().trim();TelecomManager telecom=getSystemService(TelecomManager.class);
-        if(telecom!=null&&telecom.isEmergencyNumber(digits)){if(checkSelfPermission(Manifest.permission.CALL_PHONE)!=PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{Manifest.permission.CALL_PHONE},93);return;}telecom.placeCall(Uri.fromParts("tel",digits,null),new Bundle());return;}
+        if(telecom!=null&&getSystemService(android.telephony.TelephonyManager.class).isEmergencyNumber(digits)){if(checkSelfPermission(Manifest.permission.CALL_PHONE)!=PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{Manifest.permission.CALL_PHONE},93);return;}telecom.placeCall(Uri.fromParts("tel",digits,null),new Bundle());return;}
         engine().call(digits);
     }
     private EditText field(LinearLayout form,String hint,String value,boolean password){EditText f=new EditText(this);f.setHint(hint);f.setText(value);f.setInputType(password?InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD:InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);form.addView(f);return f;}

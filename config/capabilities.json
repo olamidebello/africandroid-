@@ -128,7 +128,17 @@
     },
     {
       "id": "olamide_native_sip_calls",
-      "status": "not_implemented",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "encrypted_sip_profile_management",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "one_use_signed_dialer_profile_handoff",
+      "status": "source_implemented",
       "evidence": null
     }
   ]

@@ -1,6 +1,6 @@
 # Olamide SIP and owner-authorized OS integration
 
-The inspected Olamide mobile source identifies its package as `com.dobhrap.olamide`. No APK is supplied by this repository. This project does not implement Olamide's SIP engine, incoming-call service, Telecom ConnectionService, credential provisioning or call screens. Those must be implemented and tested in the Olamide APK. A Capacitor website wrapper alone does not meet native dialer requirements.
+The inspected Olamide mobile source identifies its package as `com.dobhrap.olamide`. The repository now includes customized native SIP dialer source in `native-dialer/`, separate from the earlier Capacitor wrapper. It includes a Liblinphone engine, profile management, call UI and InCallService. Successful APK compilation and live call behavior are distinct checks; it does not yet provide a SIP Telecom ConnectionService, push wakeup or server credential provisioning. A Capacitor website wrapper alone does not meet native dialer requirements.
 
 ## Preload and factory default
 
@@ -19,3 +19,5 @@ Open Customize → Olamide SIP and native dialer. After biometric/device-credent
 Compile the system SDK integration and overlay, boot a fresh Cuttlefish image, inspect the actual role holder, test changing and restoring defaults, verify permission allowlisting, and test dial intents plus incoming/outgoing SIP and cellular calls. Hardware tests must cover emergency handling, audio routing, Bluetooth, network transitions, reboot/push wakeup and supported ABIs. No native SIP call or compiled privileged runtime has been validated here. Never use development platform signing keys for a consumer release.
 
 Source inspected: https://github.com/olamidebello/Sip/tree/main/apps/mobile . Android role requirements: https://developer.android.com/develop/connectivity/telecom/dialer-app .
+
+Set `build_native_dialer: true` to compile the included native source through Ansible before OS preload. The SDK/Gradle paths must exist and SDK licenses be accepted. Debug builds are development artifacts, not consumer release signing. The preload step pins the APK signing certificate for the approved SIP-profile handoff.

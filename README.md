@@ -80,4 +80,8 @@ Owner-managed zone monitoring, local crossing history, optional launcher-only ap
 
 ## Olamide dialer integration
 
-Ansible can validate and preload a supplied native `com.dobhrap.olamide` APK and configure it as the factory dialer preference. The platform-signed Customizer provides an authenticated, owner-confirmed dialer-role control with a narrow permission allowlist. [Olamide integration requirements](docs/OLAMIDE-DIALER.md) explain the required APK, SDK tools and pending call/runtime tests. No Olamide APK or working native SIP engine is bundled here.
+Ansible can validate and preload a supplied native `com.dobhrap.olamide` APK and configure it as the factory dialer preference. The platform-signed Customizer provides an authenticated, owner-confirmed dialer-role control with a narrow permission allowlist. [Olamide integration requirements](docs/OLAMIDE-DIALER.md) explain the required APK, SDK tools and pending call/runtime tests. Customized native SIP-engine source is now included under `native-dialer/`; APK compilation and runtime verification are reported separately.
+
+## Native SIP dialer and encrypted profiles
+
+The native Android dialer source uses Liblinphone and includes profile management, default profile selection, explicit registration, voice-call controls and an InCallService. The [native build workflow](.github/workflows/native-dialer.yml) compiles a development APK; Ansible can build it and preload the result. See [profile security and transport scope](docs/SIP-PROFILES.md) and [native build requirements](native-dialer/README.md). This is not evidence of working calls or a compiled AfricAndroid OS.

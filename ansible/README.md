@@ -58,3 +58,7 @@ The included `mobile-integrations.yml` renders and validates sampling interval, 
 ## Olamide native phone application
 
 Configure the optional `olamide-dialer.yml` inputs only after a signed native dialer-compatible Olamide APK is available. Supply its trusted SHA-256 and Android SDK analyzer/signer paths; validation then preloads it and generates the factory default-dialer overlay. Without the APK the feature remains disabled, rather than reporting a working SIP dialer. See [APK and privileged integration requirements](../docs/OLAMIDE-DIALER.md).
+
+## Build the customized native SIP dialer
+
+Set `build_native_dialer: true` to run `native-dialer-build.yml` before the OS build. Configure JDK 17-compatible Gradle 8.13 and Android SDK platform/build-tools 35 paths. The task compiles a debug APK, computes its checksum, passes it to preload validation, and pins its signing certificate for profile handoff. Runtime credentials are entered and encrypted locally by the owner; Ansible does not provision passwords. See [SIP profile controls](../docs/SIP-PROFILES.md).
