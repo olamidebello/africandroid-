@@ -1,0 +1,18 @@
+---
+- name: Check language packs and feature status without building Android
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    project_root: "{{ playbook_dir }}/.."
+    required_locales: []
+    strict_parity: false
+  tasks:
+    - name: Check reviewed app language packs
+      ansible.builtin.command:
+        argv: [python3, "{{ project_root }}/scripts/language-packs.py", --packs, "{{ project_root }}/localization/packs", --required-locales, "{{ required_locales | join(',') }}", --report, "{{ project_root }}/artifacts/languages.json"]
+      changed_when: false
+    - name: Check feature requirements
+      ansible.builtin.command:
+        argv: "{{ ['python3', project_root + '/scripts/feature-audit.py', '--report', project_root + '/artifacts/features.json'] + (['--strict'] if strict_parity else []) }}"
+      changed_when: false

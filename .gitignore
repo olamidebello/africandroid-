@@ -3,3 +3,5 @@ artifacts/
 keys/
 __pycache__/
 *.log
+ansible/reports/
+.venv/

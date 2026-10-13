@@ -10,6 +10,8 @@ AfricAndroid uses AOSP as its OS foundation. Source implementation below means c
 | Wallpapers and personalization | Generated wallpapers and Android settings links | Validate visual layout and persistence |
 | African language discovery | Offline Glottolog language and dialect directory | Translation, native names, keyboard and speech support remain unverified |
 | Touch navigation, notifications and quick settings | Inherited from AOSP SystemUI | Boot and functional tests pending |
+| Per-action launcher/customizer authentication | Strong biometric or device credential through Android BiometricPrompt | Runtime/hardware validation pending; not system-wide |
+| Owner control | Local Android settings and choice of launcher; no remote device-owner policy | Independent device bootloader/root control depends on hardware |
 | Permissions, sandboxing, encryption, SELinux | Inherited AOSP mechanisms | Security configuration and device testing pending |
 | Networking, Bluetooth, audio, camera | Inherited AOSP interfaces and virtual-device support | Emulator and hardware support differ; test per target |
 | Accessibility and multiple users | Inherited Android settings/platform support | Validate supplied build and app accessibility |

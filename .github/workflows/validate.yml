@@ -7,5 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: pip install -r tests/requirements.txt
       - run: python3 tests/validate.py
+      - run: python3 -m unittest discover -s tests -p 'test_*.py'
+      - run: ansible-playbook --syntax-check site.yml
+        working-directory: ansible
+      - run: ansible-playbook audit.yml
+        working-directory: ansible
 # Full AOSP builds need a separately provisioned host; GitHub-hosted CI is not used for OS builds.

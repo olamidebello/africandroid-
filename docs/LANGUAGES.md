@@ -19,3 +19,7 @@ Maintain reviewed locale overlays and translations in separate language packs. R
 Glottolog 5.3, edited by Hammarström, Harald; Forkel, Robert; Haspelmath, Martin; and Bank, Sebastian. https://glottolog.org/ and https://github.com/glottolog/glottolog-cldf/tree/v5.3 . Source data is CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ . The project transforms source records into JSON shards and adds support-status fields. Source SHA-256 is stored in the bundled index.
 
 Regenerate with `python3 scripts/import-languages.py /path/to/glottolog-v5.3-languages.csv`. Obtain that file from the pinned v5.3 source URL and verify its hash against the index before regenerating. This operation updates JSON shards; review upstream version changes before accepting them.
+
+## App translation import automation
+
+Customizer and launcher UI strings now use Android resources. Reviewed JSON packs can be validated and imported with `scripts/language-packs.py` or the [Ansible playbook](../ansible/README.md). No reviewed non-English packs are currently bundled. This imports app resources only; the catalog still does not imply full system localization.

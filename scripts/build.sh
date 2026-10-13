@@ -2,6 +2,9 @@
 source "$(dirname "$0")/common.sh"
 [[ "$BUILD_VARIANT" == userdebug ]] || fail 'This emulator development target currently supports userdebug only.'
 "$AFRIC_ROOT/scripts/integrate.sh"
+mkdir -p "$ARTIFACT_DIR"
+python3 "$AFRIC_ROOT/scripts/language-packs.py" --packs "${LANGUAGE_PACK_DIR:-$AFRIC_ROOT/localization/packs}" --required-locales "${REQUIRED_APP_LOCALES:-}" --apply-to "$AOSP_DIR/vendor/africandroid/apps/Customizer" --report "$ARTIFACT_DIR/languages.json"
+python3 "$AFRIC_ROOT/scripts/feature-audit.py" --report "$ARTIFACT_DIR/features.json"
 cd "$AOSP_DIR"
 # AOSP environment scripts are not compatible with nounset.
 set +u

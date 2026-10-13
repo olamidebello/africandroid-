@@ -1,0 +1,147 @@
+---
+- name: Provision and build AfricAndroid
+  hosts: build_hosts
+  become: true
+  gather_facts: true
+  pre_tasks:
+    - name: Validate build target and configuration
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution == 'Ubuntu'
+          - ansible_facts.distribution_version is version('22.04', '>=')
+          - ansible_facts.architecture == 'x86_64'
+          - afric_user is match('^[a-z_][a-z0-9_-]*$')
+          - afric_user != 'root'
+          - afric_root is match('^/[A-Za-z0-9_/-]+$')
+          - not install_cuttlefish_host or cuttlefish_revision | length > 0
+        fail_msg: Use an x86_64 Ubuntu build host and a normal build user; pin Cuttlefish before installation.
+    - name: Require build memory when downloading or compiling Android
+      ansible.builtin.assert:
+        that: ansible_facts.memtotal_mb | int >= 60000
+        fail_msg: AOSP requires a host with at least 64 GB RAM; reports alone can run on smaller hosts.
+      when: run_sync or run_build
+  tasks:
+    - name: Install AOSP host dependencies
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+        name:
+          - git
+          - gnupg
+          - flex
+          - bison
+          - build-essential
+          - zip
+          - curl
+          - zlib1g-dev
+          - libc6-dev-i386
+          - x11proto-core-dev
+          - libx11-dev
+          - lib32z1-dev
+          - libgl1-mesa-dev
+          - libxml2-utils
+          - xsltproc
+          - unzip
+          - fontconfig
+          - python3
+          - repo
+          - adb
+        state: present
+    - name: Create unprivileged Android build account
+      ansible.builtin.user:
+        name: "{{ afric_user }}"
+        create_home: true
+        shell: /bin/bash
+    - name: Create build and report directories
+      ansible.builtin.file:
+        path: "{{ afric_root }}/{{ item }}"
+        state: directory
+        owner: "{{ afric_user }}"
+        group: "{{ afric_user }}"
+        mode: '0755'
+      loop: ['', aosp, artifacts, translations]
+    - name: Checkout AfricAndroid sources
+      ansible.builtin.git:
+        repo: "{{ afric_repo }}"
+        dest: "{{ afric_root }}/project"
+        version: "{{ afric_revision }}"
+        force: false
+      become_user: "{{ afric_user }}"
+    - name: Copy supplied reviewed translation packs from controller
+      ansible.builtin.copy:
+        src: "{{ translation_source }}/"
+        dest: "{{ afric_root }}/translations/"
+        owner: "{{ afric_user }}"
+        group: "{{ afric_user }}"
+        mode: '0644'
+      when: translation_source | length > 0
+    - name: Choose language pack source
+      ansible.builtin.set_fact:
+        pack_dir: "{{ afric_root + '/translations' if translation_source | length > 0 else afric_root + '/project/localization/packs' }}"
+    - name: Validate app translations and report coverage
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ afric_root }}/project/scripts/language-packs.py"
+          - --packs
+          - "{{ pack_dir }}"
+          - --required-locales
+          - "{{ required_app_locales | join(',') }}"
+          - --report
+          - "{{ afric_root }}/artifacts/languages.json"
+      become_user: "{{ afric_user }}"
+      changed_when: false
+    - name: Report scoped operating-system feature gaps
+      ansible.builtin.command:
+        argv: "{{ ['python3', afric_root + '/project/scripts/feature-audit.py', '--report', afric_root + '/artifacts/features.json'] + (['--strict'] if strict_feature_gate else []) }}"
+      become_user: "{{ afric_user }}"
+      changed_when: false
+    - name: Check source and build storage
+      ansible.builtin.command:
+        argv: ["{{ afric_root }}/project/scripts/preflight.sh"]
+      environment:
+        AOSP_DIR: "{{ afric_root }}/aosp"
+      become_user: "{{ afric_user }}"
+      changed_when: false
+      when: run_sync or run_build
+    - name: Sync upstream Android source
+      ansible.builtin.command:
+        argv: ["{{ afric_root }}/project/scripts/sync.sh"]
+      environment:
+        AOSP_DIR: "{{ afric_root }}/aosp"
+        ARTIFACT_DIR: "{{ afric_root }}/artifacts"
+        AOSP_BRANCH: "{{ aosp_branch }}"
+        SYNC_JOBS: "{{ sync_jobs | string }}"
+      become_user: "{{ afric_user }}"
+      async: 86400
+      poll: 30
+      when: run_sync
+    - name: Compile Android with validated app language packs
+      ansible.builtin.command:
+        argv: ["{{ afric_root }}/project/scripts/build.sh"]
+      environment:
+        AOSP_DIR: "{{ afric_root }}/aosp"
+        ARTIFACT_DIR: "{{ afric_root }}/artifacts"
+        RELEASE_CONFIG: "{{ release_config }}"
+        BUILD_JOBS: "{{ build_jobs | string }}"
+        LANGUAGE_PACK_DIR: "{{ pack_dir }}"
+        REQUIRED_APP_LOCALES: "{{ required_app_locales | join(',') }}"
+      become_user: "{{ afric_user }}"
+      async: 86400
+      poll: 30
+      when: run_build
+    - name: Optionally provision Cuttlefish host packages
+      ansible.builtin.include_tasks: cuttlefish.yml
+      when: install_cuttlefish_host
+    - name: Fetch coverage reports to the controller
+      ansible.builtin.fetch:
+        src: "{{ afric_root }}/artifacts/{{ item }}.json"
+        dest: "{{ playbook_dir }}/reports/{{ inventory_hostname }}/"
+        flat: true
+      loop: [languages, features]
+    - name: Report real deployment status
+      ansible.builtin.debug:
+        msg: >-
+          Reports saved. Compiled OS exists only if the build task succeeded.
+          Full system translations and exact cross-OS feature parity are not implemented.
+          Runtime, compatibility, signing and hardware validation remain separate release gates.

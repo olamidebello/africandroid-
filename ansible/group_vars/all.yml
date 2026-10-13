@@ -1,0 +1,20 @@
+---
+afric_user: africbuilder
+afric_root: /srv/africandroid
+afric_repo: https://github.com/olamidebello/africandroid-.git
+afric_revision: main
+# Set a reviewed commit SHA for reproducible deployments.
+aosp_branch: android-latest-release
+release_config: aosp_current
+sync_jobs: 8
+build_jobs: 8
+run_sync: true
+run_build: true
+# These gates verify readiness; they cannot create missing translations/features.
+strict_feature_gate: false
+required_app_locales: []
+# Directory on the Ansible controller with reviewed JSON packs; empty uses bundled packs.
+translation_source: ""
+install_cuttlefish_host: false
+# Pin a known-good upstream commit before enabling host installation.
+cuttlefish_revision: ""

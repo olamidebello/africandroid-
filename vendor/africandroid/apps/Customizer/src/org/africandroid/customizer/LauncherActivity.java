@@ -24,12 +24,14 @@ import java.util.Locale;
 
 /** Public Android API launcher. Profiles alter this launcher only, not Android's window manager. */
 public class LauncherActivity extends Activity {
+    private BiometricGate gate;
     private final ArrayList<ResolveInfo> apps = new ArrayList<>();
     private GridLayout grid;
     private SharedPreferences preferences;
     private String query = "";
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        gate = new BiometricGate(this);
         preferences = getSharedPreferences("launcher", MODE_PRIVATE);
         render();
     }
@@ -42,15 +44,16 @@ public class LauncherActivity extends Activity {
         LinearLayout page = new LinearLayout(this); page.setOrientation(LinearLayout.VERTICAL);
         int padding = (int)(16 * getResources().getDisplayMetrics().density);
         page.setPadding(padding, padding, padding, padding); page.setBackgroundColor(0xffedf5ef);
-        TextView title = new TextView(this); title.setText("AfricAndroid • " + profile); title.setTextSize(28); title.setTextColor(0xff006b54); page.addView(title);
-        Button profiles = new Button(this); profiles.setText("Choose layout"); page.addView(profiles);
+        TextView title = new TextView(this); title.setText(getString(R.string.workspace_title, profileLabel(profile))); title.setTextSize(28); title.setTextColor(0xff006b54); page.addView(title);
+        Button profiles = new BiometricGate.GuardedButton(this, gate); profiles.setText(getString(R.string.choose_layout)); page.addView(profiles);
         profiles.setOnClickListener(v -> {
-            String[] choices = {"Mobile", "Tablet", "Desktop"};
-            new AlertDialog.Builder(this).setTitle("Workspace layout").setItems(choices, (dialog, index) -> {
-                preferences.edit().putString("profile", choices[index]).apply(); query = ""; render();
-            }).show();
+            String[] choices = {getString(R.string.profile_mobile), getString(R.string.profile_tablet), getString(R.string.profile_desktop)};
+            String[] ids = {"Mobile", "Tablet", "Desktop"};
+            new AlertDialog.Builder(this).setTitle(getString(R.string.layout_title)).setItems(choices, (dialog, index) -> gate.run(() -> {
+                preferences.edit().putString("profile", ids[index]).apply(); query = ""; render();
+            })).show();
         });
-        EditText search = new EditText(this); search.setHint("Search installed apps"); page.addView(search);
+        EditText search = new EditText(this); search.setHint(getString(R.string.search_apps)); page.addView(search);
         ScrollView scroll = new ScrollView(this);
         grid = new GridLayout(this);
         int widthDp = getResources().getConfiguration().screenWidthDp;
@@ -58,9 +61,9 @@ public class LauncherActivity extends Activity {
         grid.setColumnCount(Math.max(2, Math.min(requested, widthDp / 100)));
         scroll.addView(grid); page.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout dock = new LinearLayout(this); dock.setOrientation(LinearLayout.HORIZONTAL);
-        dockButton(dock, "Files", new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE));
-        dockButton(dock, "Settings", new Intent(Settings.ACTION_SETTINGS));
-        dockButton(dock, "Customize", new Intent(this, MainActivity.class));
+        dockButton(dock, getString(R.string.files), new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE));
+        dockButton(dock, getString(R.string.settings), new Intent(Settings.ACTION_SETTINGS));
+        dockButton(dock, getString(R.string.customize), new Intent(this, MainActivity.class));
         page.addView(dock);
         setContentView(page);
         search.addTextChangedListener(new TextWatcher() {
@@ -70,8 +73,11 @@ public class LauncherActivity extends Activity {
         });
         loadApps(); showApps();
     }
+    private String profileLabel(String profile) {
+        return getString(profile.equals("Desktop") ? R.string.profile_desktop : profile.equals("Tablet") ? R.string.profile_tablet : R.string.profile_mobile);
+    }
     private void dockButton(LinearLayout dock, String name, Intent intent) {
-        Button b = new Button(this); b.setText(name);
+        Button b = new BiometricGate.GuardedButton(this, gate); b.setText(name);
         dock.addView(b, new LinearLayout.LayoutParams(0, -2, 1));
         b.setOnClickListener(v -> launch(intent));
     }
@@ -86,7 +92,7 @@ public class LauncherActivity extends Activity {
         for (ResolveInfo app : apps) {
             String label = app.loadLabel(getPackageManager()).toString();
             if (!label.toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT))) continue;
-            Button button = new Button(this); button.setText(label);
+            Button button = new BiometricGate.GuardedButton(this, gate); button.setText(label);
             android.graphics.drawable.Drawable icon = app.loadIcon(getPackageManager());
             int iconSize = (int)(40 * getResources().getDisplayMetrics().density);
             icon.setBounds(0, 0, iconSize, iconSize); button.setCompoundDrawables(null, icon, null, null);
@@ -96,12 +102,16 @@ public class LauncherActivity extends Activity {
             button.setOnClickListener(v -> launch(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
                 .setClassName(app.activityInfo.packageName, app.activityInfo.name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)));
             button.setOnLongClickListener(v -> {
-                launch(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + app.activityInfo.packageName))); return true;
+                gate.run(() -> launch(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + app.activityInfo.packageName)))); return true;
             });
         }
     }
+    @Override public void onStop() {
+        if (gate != null) gate.cancel();
+        super.onStop();
+    }
     private void launch(Intent intent) {
         try { startActivity(intent); }
-        catch (ActivityNotFoundException | SecurityException e) { Toast.makeText(this, "This action is unavailable on this build.", Toast.LENGTH_SHORT).show(); }
+        catch (ActivityNotFoundException | SecurityException e) { Toast.makeText(this, getString(R.string.action_unavailable), Toast.LENGTH_SHORT).show(); }
     }
 }

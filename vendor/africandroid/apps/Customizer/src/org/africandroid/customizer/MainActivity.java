@@ -33,9 +33,11 @@ import android.widget.Toast;
 import java.io.IOException;
 
 public class MainActivity extends Activity {
+    private BiometricGate gate;
     private LinearLayout panel;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        gate = new BiometricGate(this);
         ScrollView scroll = new ScrollView(this);
         panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
@@ -44,25 +46,26 @@ public class MainActivity extends Activity {
         panel.setBackgroundColor(Color.rgb(244, 249, 246));
         scroll.addView(panel);
         setContentView(scroll);
-        label("AfricAndroid", 32);
-        label("Your phone. Your style.", 20);
-        label("Android " + Build.VERSION.RELEASE + " • " + Build.MODEL, 14);
-        label("Choose a wallpaper", 20);
-        wallpaper("Forest & Gold", 0xff006b54, 0xffffd166);
-        wallpaper("Midnight & Ocean", 0xff101b3a, 0xff10b9bd);
-        wallpaper("Sunset & Earth", 0xff9b352d, 0xfff3b568);
-        button("African language directory").setOnClickListener(v -> showLanguages());
-        label("Personalize your system", 20);
-        settings("Display, dark theme & font size", Settings.ACTION_DISPLAY_SETTINGS);
-        settings("Language & keyboard", Settings.ACTION_LOCALE_SETTINGS);
-        settings("Accessibility", Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        settings("Wi-Fi", Settings.ACTION_WIFI_SETTINGS);
-        settings("Apps & permissions", Settings.ACTION_APPLICATION_SETTINGS);
-        settings("Security", Settings.ACTION_SECURITY_SETTINGS);
-        settings("Choose default home launcher", Settings.ACTION_HOME_SETTINGS);
-        button("Preview AfricAndroid workspace").setOnClickListener(v -> startActivity(new Intent(this, LauncherActivity.class)));
-        settings("All settings", Settings.ACTION_SETTINGS);
-        label("Emulator development edition • 0.1.0", 14);
+        label(getString(R.string.brand), 32);
+        label(getString(R.string.tagline), 20);
+        label(getString(R.string.android_model, Build.VERSION.RELEASE, Build.MODEL), 14);
+        label(getString(R.string.choose_wallpaper), 20);
+        wallpaper(getString(R.string.wallpaper_forest), 0xff006b54, 0xffffd166);
+        wallpaper(getString(R.string.wallpaper_ocean), 0xff101b3a, 0xff10b9bd);
+        wallpaper(getString(R.string.wallpaper_sunset), 0xff9b352d, 0xfff3b568);
+        button(getString(R.string.language_directory)).setOnClickListener(v -> showLanguages());
+        label(getString(R.string.personalize), 20);
+        settings(getString(R.string.display_settings), Settings.ACTION_DISPLAY_SETTINGS);
+        settings(getString(R.string.language_keyboard), Settings.ACTION_LOCALE_SETTINGS);
+        settings(getString(R.string.accessibility), Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        settings(getString(R.string.wifi), Settings.ACTION_WIFI_SETTINGS);
+        settings(getString(R.string.apps_permissions), Settings.ACTION_APPLICATION_SETTINGS);
+        settings(getString(R.string.security), Settings.ACTION_SECURITY_SETTINGS);
+        settings(getString(R.string.biometric_enroll), Settings.ACTION_BIOMETRIC_ENROLL);
+        settings(getString(R.string.choose_home), Settings.ACTION_HOME_SETTINGS);
+        button(getString(R.string.preview_workspace)).setOnClickListener(v -> startActivity(new Intent(this, LauncherActivity.class)));
+        settings(getString(R.string.all_settings), Settings.ACTION_SETTINGS);
+        label(getString(R.string.edition), 14);
     }
     private void label(String text, int size) {
         TextView view = new TextView(this);
@@ -71,12 +74,12 @@ public class MainActivity extends Activity {
         panel.addView(view);
     }
     private Button button(String text) {
-        Button b = new Button(this); b.setText(text); panel.addView(b); return b;
+        Button b = new BiometricGate.GuardedButton(this, gate); b.setText(text); panel.addView(b); return b;
     }
     private void settings(String text, String action) {
         button(text).setOnClickListener(v -> {
             try { startActivity(new Intent(action)); }
-            catch (ActivityNotFoundException e) { toast("This setting is unavailable on this build."); }
+            catch (ActivityNotFoundException e) { toast(getString(R.string.setting_unavailable)); }
         });
     }
     private void wallpaper(String text, int first, int second) {
@@ -88,9 +91,9 @@ public class MainActivity extends Activity {
                     paint.setShader(new LinearGradient(0, 0, 1080, 1920, first, second, Shader.TileMode.CLAMP));
                     new Canvas(bitmap).drawRect(0, 0, 1080, 1920, paint);
                     WallpaperManager.getInstance(this).setBitmap(bitmap);
-                    runOnUiThread(() -> toast("Wallpaper applied."));
+                    runOnUiThread(() -> toast(getString(R.string.wallpaper_applied)));
                 } catch (IOException | SecurityException | IllegalArgumentException e) {
-                    runOnUiThread(() -> toast("Wallpaper could not be changed."));
+                    runOnUiThread(() -> toast(getString(R.string.wallpaper_failed)));
                 } finally { bitmap.recycle(); }
             }).start();
         });
@@ -103,7 +106,7 @@ public class MainActivity extends Activity {
         }
     }
     private void showLanguages() {
-        toast("Loading African language catalog…");
+        toast(getString(R.string.catalog_loading));
         new Thread(() -> {
             ArrayList<String> labels = new ArrayList<>();
             try {
@@ -116,16 +119,16 @@ public class MainActivity extends Activity {
                     }
                 }
                 runOnUiThread(() -> languageDialog(labels));
-            } catch (Exception e) { runOnUiThread(() -> toast("Language catalog could not be loaded.")); }
+            } catch (Exception e) { runOnUiThread(() -> toast(getString(R.string.catalog_failed))); }
         }).start();
     }
     private void languageDialog(ArrayList<String> labels) {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         TextView info = new TextView(this);
-        info.setText("Catalog entries do not guarantee Android translations, keyboard or speech support. Search a name or language code.");
+        info.setText(getString(R.string.catalog_disclaimer));
         layout.addView(info);
-        EditText search = new EditText(this); search.setHint("Search African languages"); layout.addView(search);
+        EditText search = new EditText(this); search.setHint(getString(R.string.search_languages)); layout.addView(search);
         ListView list = new ListView(this);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, labels);
         list.setAdapter(adapter);
@@ -137,13 +140,17 @@ public class MainActivity extends Activity {
         });
         list.setOnItemClickListener((parent, view, position, id) -> new AlertDialog.Builder(this)
             .setTitle(adapter.getItem(position))
-            .setMessage("System translations: unverified\nKeyboard: unverified\nSpeech: unverified\n\nAndroid settings show the languages actually available in this build.")
-            .setPositiveButton("Language settings", (dialog, which) -> {
+            .setMessage(getString(R.string.language_status))
+            .setPositiveButton(getString(R.string.language_settings), (dialog, which) -> gate.run(() -> {
                 try { startActivity(new Intent(Settings.ACTION_LOCALE_SETTINGS)); }
-                catch (ActivityNotFoundException e) { toast("Language settings unavailable."); }
-            }).setNegativeButton("Close", null).show());
-        new AlertDialog.Builder(this).setTitle("African language directory")
-            .setView(layout).setNegativeButton("Close", null).show();
+                catch (ActivityNotFoundException e) { toast(getString(R.string.language_unavailable)); }
+            })).setNegativeButton(getString(R.string.close), null).show());
+        new AlertDialog.Builder(this).setTitle(getString(R.string.language_directory))
+            .setView(layout).setNegativeButton(getString(R.string.close), null).show();
+    }
+    @Override public void onStop() {
+        if (gate != null) gate.cancel();
+        super.onStop();
     }
     private void toast(String text) { Toast.makeText(this, text, Toast.LENGTH_SHORT).show(); }
 }

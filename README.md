@@ -59,3 +59,11 @@ The customization app includes a searchable offline Glottolog catalog of 2379 Af
 ## Mobile and desktop workspace
 
 AfricAndroid includes an optional home launcher with Mobile, Tablet and Desktop layout profiles, app search, app icons, launch actions, long-press app details, and a Files/Settings/Customize dock. Choose it in Android home-app settings or preview it from the customization app. See [capability status](docs/CAPABILITIES.md) for implemented sources and remaining cross-OS features.
+
+## Ansible and reviewed translations
+
+See [Ansible deployment](ansible/README.md) for host provisioning, full AOSP builds, validated app language-pack imports and explicit feature reports. All Customizer/launcher UI strings are resource-based and RTL support is declared. No reviewed non-English packs are bundled yet, and system-wide localization is not implemented. Strict gates reject missing required packs or unverified feature requirements.
+
+## Owner authentication
+
+Protected launcher/customizer actions require fresh Android strong-biometric or device-credential authentication. Enrollment and control use local Android settings, with no remote management dependency. See [authentication scope and hardware requirements](docs/AUTHENTICATION.md). This is app-level enforcement; system-wide event authentication remains unimplemented.

@@ -1,0 +1,115 @@
+{
+  "scope": "Finite capability list for this project; not an exhaustive feature inventory of every operating system",
+  "features": [
+    {
+      "id": "mobile_tablet_desktop_launcher",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "app_search_and_launch",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "dock_and_settings",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "wallpaper_customization",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "african_language_catalog",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "notifications_quick_settings",
+      "status": "upstream_inherited",
+      "evidence": null
+    },
+    {
+      "id": "android_sandbox_permissions",
+      "status": "upstream_inherited",
+      "evidence": null
+    },
+    {
+      "id": "android_accessibility",
+      "status": "upstream_inherited",
+      "evidence": null
+    },
+    {
+      "id": "android_networking",
+      "status": "upstream_inherited",
+      "evidence": null
+    },
+    {
+      "id": "fully_translated_android_system",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "african_keyboards_all_languages",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "african_speech_all_languages",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "desktop_window_manager",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "virtual_desktops",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "cross_device_sync",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "signed_ota_service",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "linux_app_runtime",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "windows_app_compatibility",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "macos_ios_app_compatibility",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "proprietary_apple_microsoft_services",
+      "status": "not_implemented",
+      "evidence": null
+    },
+    {
+      "id": "per_action_app_authentication",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "system_wide_event_authentication",
+      "status": "not_implemented",
+      "evidence": null
+    }
+  ]
+}

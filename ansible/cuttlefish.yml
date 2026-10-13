@@ -1,0 +1,42 @@
+---
+- name: Install Cuttlefish packaging dependencies
+  ansible.builtin.apt:
+    name: [devscripts, equivs, config-package-dev, debhelper-compat, golang]
+    state: present
+- name: Checkout pinned upstream Cuttlefish host source
+  ansible.builtin.git:
+    repo: https://github.com/google/android-cuttlefish
+    dest: "{{ afric_root }}/cuttlefish"
+    version: "{{ cuttlefish_revision }}"
+    force: false
+  become_user: "{{ afric_user }}"
+- name: Build host packages
+  ansible.builtin.command:
+    argv: [tools/buildutils/build_packages.sh]
+    chdir: "{{ afric_root }}/cuttlefish"
+  become_user: "{{ afric_user }}"
+  async: 7200
+  poll: 30
+- name: Locate generated host packages
+  ansible.builtin.find:
+    paths: "{{ afric_root }}/cuttlefish"
+    patterns: ['cuttlefish-base_*_amd64.deb', 'cuttlefish-user_*_amd64.deb']
+  register: host_packages
+- name: Require both host package families
+  ansible.builtin.assert:
+    that:
+      - host_packages.files | selectattr('path', 'search', 'cuttlefish-base_') | list | length > 0
+      - host_packages.files | selectattr('path', 'search', 'cuttlefish-user_') | list | length > 0
+- name: Install generated host packages
+  ansible.builtin.apt:
+    deb: "{{ item.path }}"
+    state: present
+  loop: "{{ host_packages.files }}"
+- name: Enable emulator account groups
+  ansible.builtin.user:
+    name: "{{ afric_user }}"
+    groups: [kvm, cvdnetwork, render]
+    append: true
+- name: Explain host activation
+  ansible.builtin.debug:
+    msg: Restart the host to apply modules and udev rules, then run launch.sh as the build account. No reboot or emulator launch is performed automatically.
