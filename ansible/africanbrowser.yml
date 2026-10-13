@@ -1,0 +1,14 @@
+---
+- name: Require signed AfricanBrowser APK for the factory browser
+  ansible.builtin.assert:
+    that:
+      - africanbrowser_apk_source | length > 0
+      - africanbrowser_apk_sha256 is match('^[a-fA-F0-9]{64}$')
+    fail_msg: Supply a signed org.africanbrowser.browser APK with x86_64 support for Cuttlefish and its trusted SHA-256, or explicitly disable africanbrowser_enabled.
+- name: Upload AfricanBrowser APK
+  ansible.builtin.copy:
+    src: "{{ africanbrowser_apk_source }}"
+    dest: "{{ afric_root }}/artifacts/AfricanBrowser.apk"
+    owner: "{{ afric_user }}"
+    group: "{{ afric_user }}"
+    mode: '0644'

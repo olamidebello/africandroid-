@@ -123,4 +123,9 @@
   <string name="sip_failed">"Profile could not be saved or unlocked. Check fields, profile limit and device authentication; invalidated keys require re-entering credentials."</string>
   <string name="sip_bridge_missing">"Trusted Olamide profile integration is unavailable. Install the validated APK with profile-import support."</string>
   <string name="sip_transfer_confirm">"Share this profile, including SIP credentials, once with the trusted Olamide app? Registration and calls remain controlled by that app."</string>
+  <string name="browser_title">AfricanBrowser default browser</string>
+  <string name="browser_scope">AfricanBrowser is the factory browser when its signed APK is included in the OS build. Select it for this user or choose another browser in Android Default apps.</string>
+  <string name="browser_select">Make AfricanBrowser my default browser</string>
+  <string name="browser_missing">AfricanBrowser is missing or cannot hold the browser role. Install a compatible signed APK first.</string>
+  <string name="browser_selected">AfricanBrowser selected as the default browser.</string>
 </resources>

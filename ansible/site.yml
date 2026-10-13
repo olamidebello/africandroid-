@@ -121,6 +121,9 @@
     - name: Optionally compile customized native Olamide SIP APK
       ansible.builtin.include_tasks: native-dialer-build.yml
       when: build_native_dialer
+    - name: Provision factory AfricanBrowser APK
+      ansible.builtin.include_tasks: africanbrowser.yml
+      when: africanbrowser_enabled and (run_build or africanbrowser_apk_source | length > 0)
     - name: Configure optional native Olamide dialer input
       ansible.builtin.include_tasks: olamide-dialer.yml
     - name: Compile Android with validated app language packs
@@ -132,6 +135,9 @@
         RELEASE_CONFIG: "{{ release_config }}"
         BUILD_JOBS: "{{ build_jobs | string }}"
         LANGUAGE_PACK_DIR: "{{ pack_dir }}"
+        AFRICANBROWSER_ENABLED: "{{ africanbrowser_enabled | ternary('true', 'false') }}"
+        AFRICANBROWSER_APK: "{{ afric_root }}/artifacts/AfricanBrowser.apk"
+        AFRICANBROWSER_APK_SHA256: "{{ africanbrowser_apk_sha256 }}"
         OLAMIDE_ENABLED: "{{ olamide_enabled | ternary('true', 'false') }}"
         OLAMIDE_APK: "{{ afric_root }}/artifacts/OlamideSip.apk"
         OLAMIDE_APK_SHA256: "{{ olamide_apk_sha256 }}"

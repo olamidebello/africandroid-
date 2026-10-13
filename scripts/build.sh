@@ -8,6 +8,11 @@ if [[ "${OLAMIDE_ENABLED:-false}" == true ]]; then
     dialer_args=(--enabled --apk "${OLAMIDE_APK:?Olamide APK required}" --sha256 "${OLAMIDE_APK_SHA256:?APK SHA256 required}" --apkanalyzer "${APK_ANALYZER:-apkanalyzer}" --apksigner "${APK_SIGNER:-apksigner}")
 fi
 python3 "$AFRIC_ROOT/scripts/integrate-olamide.py" --aosp "$AOSP_DIR" --report "$ARTIFACT_DIR/dialer.json" "${dialer_args[@]}"
+browser_args=()
+if [[ "${AFRICANBROWSER_ENABLED:-true}" == true ]]; then
+    browser_args=(--enabled --apk "${AFRICANBROWSER_APK:?AfricanBrowser APK required}" --sha256 "${AFRICANBROWSER_APK_SHA256:?APK SHA256 required}" --apkanalyzer "${APK_ANALYZER:-apkanalyzer}" --apksigner "${APK_SIGNER:-apksigner}")
+fi
+python3 "$AFRIC_ROOT/scripts/integrate-browser.py" --aosp "$AOSP_DIR" --report "$ARTIFACT_DIR/browser.json" "${browser_args[@]}"
 mobile_profile_args=()
 if [[ -n "${MOBILE_PROFILE:-}" ]]; then mobile_profile_args=(--profile "$MOBILE_PROFILE"); fi
 python3 "$AFRIC_ROOT/scripts/mobile-profile.py" "${mobile_profile_args[@]}" --apply-to "$AOSP_DIR/vendor/africandroid/apps/Customizer" --report "$ARTIFACT_DIR/mobile.json"

@@ -36,3 +36,8 @@ build_native_dialer: false
 native_android_sdk: "{{ afric_root }}/android-sdk"
 native_gradle_path: "{{ afric_root }}/native-tools/gradle-8.13/bin/gradle"
 provision_native_build_tools: true
+
+# Factory browser selection requires a signed Chromium-based AfricanBrowser APK.
+africanbrowser_enabled: true
+africanbrowser_apk_source: ""
+africanbrowser_apk_sha256: ""

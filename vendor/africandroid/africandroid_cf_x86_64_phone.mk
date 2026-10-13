@@ -14,3 +14,5 @@ PRODUCT_SYSTEM_PROPERTIES += ro.config.lock_wallpaper=/product/etc/africandroid/
 # Narrow, owner-authenticated OS role integration; no root or blanket app privilege grant.
 PRODUCT_COPY_FILES += vendor/africandroid/permissions/privapp-permissions-africandroid.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-africandroid.xml
 -include vendor/africandroid/olamide/product.mk
+
+-include vendor/africandroid/africanbrowser/product.mk

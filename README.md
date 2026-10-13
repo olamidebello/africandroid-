@@ -85,3 +85,9 @@ Ansible can validate and preload a supplied native `com.dobhrap.olamide` APK and
 ## Native SIP dialer and encrypted profiles
 
 The native Android dialer source uses Liblinphone and includes profile management, default profile selection, explicit registration, voice-call controls and an InCallService. The [native build workflow](.github/workflows/native-dialer.yml) compiles a development APK; Ansible can build it and preload the result. See [profile security and transport scope](docs/SIP-PROFILES.md) and [native build requirements](native-dialer/README.md). This is not evidence of working calls or a compiled AfricAndroid OS.
+
+## AfricanBrowser factory default
+
+AfricanBrowser (`org.africanbrowser.browser`) is configured as the factory browser when preloaded. Build with a signed, standalone AfricanBrowser APK and trusted SHA-256. The Cuttlefish target needs x86_64 browser libraries; the AfricanBrowser ARM64 phone build cannot be used for this emulator. No compiled browser APK is bundled here. Android still validates browser-role eligibility, and each user can select another browser in Default apps. Customizer includes a biometric-protected browser selection control for existing users.
+
+For Ansible set `africanbrowser_apk_source` and `africanbrowser_apk_sha256`; `africanbrowser_enabled` defaults true. For direct builds set `AFRICANBROWSER_APK` and `AFRICANBROWSER_APK_SHA256`. Missing APK, wrong package, invalid signature/checksum, restricted web-link filters or incompatible native ABI block preloading. For a development build without the browser explicitly set `africanbrowser_enabled=false` / `AFRICANBROWSER_ENABLED=false`. A factory default applies to a fresh user and does not override an existing user's chosen browser. The OS image and browser-role behavior still require boot testing.
