@@ -1,0 +1,5 @@
+<resources>
+  <integer name="geo_sample_interval_ms">30000</integer>
+  <integer name="geo_max_sample_age_ms">180000</integer>
+  <integer name="geo_event_history_limit">200</integer>
+</resources>

@@ -18,3 +18,15 @@ translation_source: ""
 install_cuttlefish_host: false
 # Pin a known-good upstream commit before enabling host installation.
 cuttlefish_revision: ""
+
+# Build-time location policy; monitoring and launcher restrictions stay opt-in.
+geofencing_sample_interval_ms: 30000
+geofencing_max_sample_age_ms: 180000
+geofencing_event_history_limit: 200
+
+# Native Olamide integration is blocked until a signed, compatible APK is supplied.
+olamide_enabled: false
+olamide_apk_source: ""
+olamide_apk_sha256: ""
+apk_analyzer_path: /opt/android-sdk/cmdline-tools/latest/bin/apkanalyzer
+apk_signer_path: /opt/android-sdk/build-tools/35.0.0/apksigner

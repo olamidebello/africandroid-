@@ -110,6 +110,26 @@
       "id": "system_wide_event_authentication",
       "status": "not_implemented",
       "evidence": null
+    },
+    {
+      "id": "owner_controlled_geofencing",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "local_carrier_display_management",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "owner_authenticated_default_dialer_selection",
+      "status": "source_implemented",
+      "evidence": null
+    },
+    {
+      "id": "olamide_native_sip_calls",
+      "status": "not_implemented",
+      "evidence": null
     }
   ]
 }

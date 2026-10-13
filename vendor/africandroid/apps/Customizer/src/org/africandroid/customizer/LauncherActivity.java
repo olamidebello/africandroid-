@@ -39,14 +39,18 @@ public class LauncherActivity extends Activity {
     }
     @Override public void onResume() {
         super.onResume();
-        if (grid != null) { loadApps(); showApps(); }
+        if (grid != null) { render(); }
     }
     private void render() {
+        query = "";
         String profile = preferences.getString("profile", "Mobile");
         LinearLayout page = new LinearLayout(this); page.setOrientation(LinearLayout.VERTICAL);
         int padding = (int)(16 * getResources().getDisplayMetrics().density);
         page.setPadding(padding, padding, padding, padding); page.setBackgroundColor(Color.TRANSPARENT);
         TextView title = new TextView(this); title.setText(getString(R.string.workspace_title, profileLabel(profile))); title.setTextSize(28); title.setTextColor(0xffffd166); page.addView(title);
+        TextView carrierBadge = new TextView(this);
+        carrierBadge.setText(getString(R.string.carrier_local_badge, getSharedPreferences("carrier_display",MODE_PRIVATE).getString("badge","AfricAndroid")));
+        carrierBadge.setTextColor(0xfffff3cf);page.addView(carrierBadge);
         Button profiles = new BiometricGate.GuardedButton(this, gate); profiles.setText(getString(R.string.choose_layout)); page.addView(profiles);
         profiles.setOnClickListener(v -> {
             String[] choices = {getString(R.string.profile_mobile), getString(R.string.profile_tablet), getString(R.string.profile_desktop)};
@@ -122,6 +126,11 @@ public class LauncherActivity extends Activity {
         super.onStop();
     }
     private void launch(Intent intent) {
+        if (Intent.ACTION_MAIN.equals(intent.getAction()) && intent.hasCategory(Intent.CATEGORY_LAUNCHER)
+                && intent.getComponent() != null && !getPackageName().equals(intent.getComponent().getPackageName())
+                && !GeoStore.permitsAppLaunch(this)) {
+            Toast.makeText(this, R.string.geo_launch_blocked, Toast.LENGTH_LONG).show(); return;
+        }
         try { startActivity(intent); }
         catch (ActivityNotFoundException | SecurityException e) { Toast.makeText(this, getString(R.string.action_unavailable), Toast.LENGTH_SHORT).show(); }
     }

@@ -1,0 +1,13 @@
+---
+- name: Write location integration profile without granting device permissions
+  ansible.builtin.template:
+    src: mobile-profile.json.j2
+    dest: "{{ afric_root }}/artifacts/mobile-profile.json"
+    owner: "{{ afric_user }}"
+    group: "{{ afric_user }}"
+    mode: '0644'
+- name: Validate configured mobile integration policy
+  ansible.builtin.command:
+    argv: [python3, "{{ afric_root }}/project/scripts/mobile-profile.py", --profile, "{{ afric_root }}/artifacts/mobile-profile.json", --report, "{{ afric_root }}/artifacts/mobile.json"]
+  become_user: "{{ afric_user }}"
+  changed_when: false

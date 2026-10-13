@@ -96,6 +96,8 @@
         argv: "{{ ['python3', afric_root + '/project/scripts/feature-audit.py', '--report', afric_root + '/artifacts/features.json'] + (['--strict'] if strict_feature_gate else []) }}"
       become_user: "{{ afric_user }}"
       changed_when: false
+    - name: Configure geofencing and mobile integrations
+      ansible.builtin.include_tasks: mobile-integrations.yml
     - name: Check source and build storage
       ansible.builtin.command:
         argv: ["{{ afric_root }}/project/scripts/preflight.sh"]
@@ -116,6 +118,8 @@
       async: 86400
       poll: 30
       when: run_sync
+    - name: Configure optional native Olamide dialer input
+      ansible.builtin.include_tasks: olamide-dialer.yml
     - name: Compile Android with validated app language packs
       ansible.builtin.command:
         argv: ["{{ afric_root }}/project/scripts/build.sh"]
@@ -125,6 +129,12 @@
         RELEASE_CONFIG: "{{ release_config }}"
         BUILD_JOBS: "{{ build_jobs | string }}"
         LANGUAGE_PACK_DIR: "{{ pack_dir }}"
+        OLAMIDE_ENABLED: "{{ olamide_enabled | ternary('true', 'false') }}"
+        OLAMIDE_APK: "{{ afric_root }}/artifacts/OlamideSip.apk"
+        OLAMIDE_APK_SHA256: "{{ olamide_apk_sha256 }}"
+        APK_ANALYZER: "{{ apk_analyzer_path }}"
+        APK_SIGNER: "{{ apk_signer_path }}"
+        MOBILE_PROFILE: "{{ afric_root }}/artifacts/mobile-profile.json"
         REQUIRED_APP_LOCALES: "{{ required_app_locales | join(',') }}"
       become_user: "{{ afric_user }}"
       async: 86400
@@ -138,7 +148,7 @@
         src: "{{ afric_root }}/artifacts/{{ item }}.json"
         dest: "{{ playbook_dir }}/reports/{{ inventory_hostname }}/"
         flat: true
-      loop: [languages, features]
+      loop: [languages, features, mobile]
     - name: Report real deployment status
       ansible.builtin.debug:
         msg: >-

@@ -50,3 +50,11 @@ Documentation: https://docs.ansible.com/projects/ansible/latest/collections/ansi
 ## Authentication sources
 
 The built product includes per-action Android authentication in the launcher/customizer. Ansible does not enroll biometric templates or set a universal device PIN. The owner enrolls credentials locally after boot; hardware sensors and secure biometric implementations must be supplied and tested separately. See [authentication scope](../docs/AUTHENTICATION.md).
+
+## Geofencing and carrier information
+
+The included `mobile-integrations.yml` renders and validates sampling interval, maximum accepted location age and local history size. The build imports these Android resources and includes the geofencing service and carrier display screen. It does not enable tracking, grant location/phone permission, set zones or change operator identity automatically. Device owners manage those controls locally after boot. The controller receives a `mobile.json` configuration report. See [mobile integration details](../docs/MOBILE-INTEGRATIONS.md).
+
+## Olamide native phone application
+
+Configure the optional `olamide-dialer.yml` inputs only after a signed native dialer-compatible Olamide APK is available. Supply its trusted SHA-256 and Android SDK analyzer/signer paths; validation then preloads it and generates the factory default-dialer overlay. Without the APK the feature remains disabled, rather than reporting a working SIP dialer. See [APK and privileged integration requirements](../docs/OLAMIDE-DIALER.md).

@@ -4,7 +4,7 @@ A custom AOSP distribution project targeting an x86_64 Cuttlefish virtual phone.
 
 **Status: source and build automation prepared; no OS image has been compiled or boot-validated yet. This is not a production-certified release.**
 
-The complete Android platform is downloaded from upstream using Repo rather than duplicated into this Git repository. The custom product inherits AOSP's Cuttlefish phone configuration, retains its operating-system components, and adds AfricAndroid branding and the AfricCustomizer application. The app applies three generated wallpapers and opens real Android settings for display, language, accessibility, Wi-Fi, apps and security. It uses public APIs and requests only wallpaper permission.
+The complete Android platform is downloaded from upstream using Repo rather than duplicated into this Git repository. The custom product inherits AOSP's Cuttlefish phone configuration, retains its operating-system components, and adds AfricAndroid branding and the AfricCustomizer application. The app applies three generated wallpapers and opens real Android settings for display, language, accessibility, Wi-Fi, apps and security. It uses Android resources and owner-granted runtime permissions. Dialer-role selection uses a narrow platform-signed OS integration; location and phone-state controls require explicit user consent.
 
 ## Build on your own host
 
@@ -73,3 +73,11 @@ Protected launcher/customizer actions require fresh Android strong-biometric or 
 The supplied Africa circuit logo, AfricAndroid wordmark, and original slogan are preserved together in the original image. It is used for the app icon, customization header, launcher background, and factory default home/lock wallpaper configuration. The launcher displays the whole artwork with aspect ratio preserved against black; Android system wallpaper cropping varies by screen and requires runtime verification. Users can change wallpapers and restore the branded home wallpaper through the authenticated customization action. Rebuilding does not force-reset an existing user's wallpaper. The artwork is user-provided branding; the source-code Apache license does not grant third-party trademark rights.
 
 The launcher and customization screens now share a forest-green, gold and black theme, the original Africa artwork and slogan, gold-bordered touch controls, and language/keyboard/region settings access. Styling applies to these AfricAndroid apps; inherited Android SystemUI and third-party applications retain their own themes. African language entries represent a diverse continent and are not a claim of translated menus for every language.
+
+## Location and operator controls
+
+Owner-managed zone monitoring, local crossing history, optional launcher-only app restrictions and local carrier display labels are included. Ansible configures build-time location policy and builds these integrations, while runtime permissions and consent remain with the device owner. See [mobile integration scope](docs/MOBILE-INTEGRATIONS.md). These source changes have not been exercised on a compiled OS or physical modem/GPS hardware.
+
+## Olamide dialer integration
+
+Ansible can validate and preload a supplied native `com.dobhrap.olamide` APK and configure it as the factory dialer preference. The platform-signed Customizer provides an authenticated, owner-confirmed dialer-role control with a narrow permission allowlist. [Olamide integration requirements](docs/OLAMIDE-DIALER.md) explain the required APK, SDK tools and pending call/runtime tests. No Olamide APK or working native SIP engine is bundled here.

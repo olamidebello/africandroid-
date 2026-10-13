@@ -1,0 +1,5 @@
+<permissions>
+    <privapp-permissions package="org.africandroid.customizer">
+        <permission name="android.permission.MANAGE_ROLE_HOLDERS" />
+    </privapp-permissions>
+</permissions>

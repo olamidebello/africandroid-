@@ -1,0 +1,16 @@
+---
+- name: Require trusted native Olamide APK inputs when integration is enabled
+  ansible.builtin.assert:
+    that:
+      - olamide_apk_source | length > 0
+      - olamide_apk_sha256 is match('^[a-fA-F0-9]{64}$')
+    fail_msg: Supply a signed, dialer-compatible Olamide APK and trusted SHA-256. A web-only wrapper is insufficient.
+  when: olamide_enabled
+- name: Upload supplied Olamide APK to the build host
+  ansible.builtin.copy:
+    src: "{{ olamide_apk_source }}"
+    dest: "{{ afric_root }}/artifacts/OlamideSip.apk"
+    owner: "{{ afric_user }}"
+    group: "{{ afric_user }}"
+    mode: '0644'
+  when: olamide_enabled

@@ -16,3 +16,8 @@
       ansible.builtin.command:
         argv: "{{ ['python3', project_root + '/scripts/feature-audit.py', '--report', project_root + '/artifacts/features.json'] + (['--strict'] if strict_parity else []) }}"
       changed_when: false
+
+    - name: Validate default location integration settings
+      ansible.builtin.command:
+        argv: [python3, "{{ project_root }}/scripts/mobile-profile.py", --report, "{{ project_root }}/artifacts/mobile.json"]
+      changed_when: false
