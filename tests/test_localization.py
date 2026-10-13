@@ -32,7 +32,7 @@ class LanguagePackTests(unittest.TestCase):
  def test_resource_references_exist_and_java_parses(self):
   import re,javalang
   app=ROOT/'vendor/africandroid/apps/Customizer'
-  keys={node.attrib['name'] for node in ET.parse(app/'res/values/strings.xml').getroot()}
+  keys={node.attrib['name'] for values in (app/'res/values').glob('*.xml') for node in ET.parse(values).getroot() if node.tag=='string'}
   for source in (app/'src').rglob('*.java'):
    content=source.read_text();javalang.parse.parse(content)
    self.assertTrue(set(re.findall(r'(?<!android\.)R\.string\.(\w+)',content))<=keys)

@@ -104,4 +104,23 @@
   <string name="dialer_defaults">"Manage Android default apps"</string>
   <string name="dialer_missing">"Olamide SIP is missing, ineligible or cannot be selected on this device. Install a compatible native dialer APK and test Telecom integration."</string>
   <string name="dialer_selected">"Olamide SIP selected as the default phone app."</string>
+  <string name="sip_title">"SIP profiles and calling account"</string>
+  <string name="sip_scope">"Manage up to 25 local SIP profiles. Credentials use an authentication-bound Android Keystore vault. TLS is recommended; TCP/UDP are unencrypted. Native SIP and WSS/WebRTC require their corresponding endpoints and engines. Selecting a profile does not prove registration."</string>
+  <string name="sip_add">"Add SIP profile"</string>
+  <string name="sip_edit">"Edit SIP profile"</string>
+  <string name="sip_set_default">"Set default SIP profile"</string>
+  <string name="sip_dial">"Use profile in Olamide dialer"</string>
+  <string name="sip_dial_default">"Open dialer with default SIP profile"</string>
+  <string name="sip_delete">"Delete SIP profile"</string>
+  <string name="sip_delete_confirm">"Delete this local SIP profile and its stored credentials?"</string>
+  <string name="sip_default_marker">" • default"</string>
+  <string name="sip_name">"Profile name"</string>
+  <string name="sip_user">"SIP username"</string>
+  <string name="sip_domain">"SIP domain"</string>
+  <string name="sip_wss">"Server URI: sip:host:port or wss://host/path"</string>
+  <string name="sip_password">"Password (blank keeps existing when editing)"</string>
+  <string name="sip_no_default">"Choose a default SIP profile first."</string>
+  <string name="sip_failed">"Profile could not be saved or unlocked. Check fields, profile limit and device authentication; invalidated keys require re-entering credentials."</string>
+  <string name="sip_bridge_missing">"Trusted Olamide profile integration is unavailable. Install the validated APK with profile-import support."</string>
+  <string name="sip_transfer_confirm">"Share this profile, including SIP credentials, once with the trusted Olamide app? Registration and calls remain controlled by that app."</string>
 </resources>

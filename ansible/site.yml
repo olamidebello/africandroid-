@@ -118,6 +118,9 @@
       async: 86400
       poll: 30
       when: run_sync
+    - name: Optionally compile customized native Olamide SIP APK
+      ansible.builtin.include_tasks: native-dialer-build.yml
+      when: build_native_dialer
     - name: Configure optional native Olamide dialer input
       ansible.builtin.include_tasks: olamide-dialer.yml
     - name: Compile Android with validated app language packs

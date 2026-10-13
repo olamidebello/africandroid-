@@ -1,0 +1,38 @@
+---
+- name: Require configured Gradle and Android SDK for native APK build
+  ansible.builtin.assert:
+    that:
+      - native_android_sdk | length > 0
+      - native_gradle_path | length > 0
+    fail_msg: Configure a Gradle 8.13 executable and Android SDK platform 35/build-tools 35.0.0 with accepted licenses.
+- name: Install Java for native APK compilation
+  ansible.builtin.apt:
+    name: openjdk-17-jdk-headless
+    state: present
+- name: Compile customized native Olamide SIP APK
+  ansible.builtin.command:
+    argv: ["{{ native_gradle_path }}", --no-daemon, ':app:assembleDebug']
+    chdir: "{{ afric_root }}/project/native-dialer"
+  environment:
+    ANDROID_HOME: "{{ native_android_sdk }}"
+    JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+  become_user: "{{ afric_user }}"
+  async: 3600
+  poll: 30
+- name: Copy compiled native dialer for optional OS preload
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ afric_root }}/project/native-dialer/app/build/outputs/apk/debug/app-debug.apk"
+    dest: "{{ afric_root }}/artifacts/OlamideSip.apk"
+    owner: "{{ afric_user }}"
+    group: "{{ afric_user }}"
+    mode: '0644'
+- name: Calculate compiled APK checksum
+  ansible.builtin.stat:
+    path: "{{ afric_root }}/artifacts/OlamideSip.apk"
+    checksum_algorithm: sha256
+  register: native_apk
+- name: Use generated APK in build-time dialer preload validation
+  ansible.builtin.set_fact:
+    olamide_enabled: true
+    olamide_apk_sha256: "{{ native_apk.stat.checksum }}"

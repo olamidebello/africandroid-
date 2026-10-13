@@ -1,0 +1,12 @@
+<resources>
+    <style name="AfricTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#FFD166</item>
+        <item name="android:windowBackground">#031B13</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:textColorPrimary">#FFF3CF</item>
+        <item name="android:textColorSecondary">#D6EADF</item>
+    </style>
+</resources>

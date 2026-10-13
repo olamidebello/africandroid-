@@ -78,6 +78,7 @@ public class MainActivity extends Activity {
         settings(getString(R.string.accessibility), Settings.ACTION_ACCESSIBILITY_SETTINGS);
         settings(getString(R.string.wifi), Settings.ACTION_WIFI_SETTINGS);
         settings(getString(R.string.apps_permissions), Settings.ACTION_APPLICATION_SETTINGS);
+        button(getString(R.string.sip_title)).setOnClickListener(v -> startActivity(new Intent(this, SipProfilesActivity.class)));
         button(getString(R.string.dialer_title)).setOnClickListener(v -> startActivity(new Intent(this, DialerIntegrationActivity.class)));
         button(getString(R.string.carrier_title)).setOnClickListener(v -> startActivity(new Intent(this, CarrierInfoActivity.class)));
         button(getString(R.string.geo_title)).setOnClickListener(v -> startActivity(new Intent(this, GeofenceActivity.class)));

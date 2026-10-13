@@ -5,3 +5,8 @@ __pycache__/
 *.log
 ansible/reports/
 .venv/
+native-dialer/.gradle/
+native-dialer/**/build/
+native-dialer/local.properties
+*.jks
+*.keystore

@@ -107,6 +107,25 @@
     "dialer_open": "Open Olamide SIP dialpad",
     "dialer_defaults": "Manage Android default apps",
     "dialer_missing": "Olamide SIP is missing, ineligible or cannot be selected on this device. Install a compatible native dialer APK and test Telecom integration.",
-    "dialer_selected": "Olamide SIP selected as the default phone app."
+    "dialer_selected": "Olamide SIP selected as the default phone app.",
+    "sip_title": "SIP profiles and calling account",
+    "sip_scope": "Manage up to 25 local SIP profiles. Credentials use an authentication-bound Android Keystore vault. TLS is recommended; TCP/UDP are unencrypted. Native SIP and WSS/WebRTC require their corresponding endpoints and engines. Selecting a profile does not prove registration.",
+    "sip_add": "Add SIP profile",
+    "sip_edit": "Edit SIP profile",
+    "sip_set_default": "Set default SIP profile",
+    "sip_dial": "Use profile in Olamide dialer",
+    "sip_dial_default": "Open dialer with default SIP profile",
+    "sip_delete": "Delete SIP profile",
+    "sip_delete_confirm": "Delete this local SIP profile and its stored credentials?",
+    "sip_default_marker": " • default",
+    "sip_name": "Profile name",
+    "sip_user": "SIP username",
+    "sip_domain": "SIP domain",
+    "sip_wss": "Server URI: sip:host:port or wss://host/path",
+    "sip_password": "Password (blank keeps existing when editing)",
+    "sip_no_default": "Choose a default SIP profile first.",
+    "sip_failed": "Profile could not be saved or unlocked. Check fields, profile limit and device authentication; invalidated keys require re-entering credentials.",
+    "sip_bridge_missing": "Trusted Olamide profile integration is unavailable. Install the validated APK with profile-import support.",
+    "sip_transfer_confirm": "Share this profile, including SIP credentials, once with the trusted Olamide app? Registration and calls remain controlled by that app."
   }
 }

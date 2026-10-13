@@ -24,6 +24,7 @@ public class DialerIntegrationActivity extends Activity {
             .setPositiveButton(R.string.dialer_select,(dialog,which)->gate.run(()->selectOlamide())).setNegativeButton(R.string.close,null).show());
         Button dial=new BiometricGate.GuardedButton(this,gate);dial.setText(R.string.dialer_open);panel.addView(dial);
         dial.setOnClickListener(v->{try{startActivity(new Intent(Intent.ACTION_DIAL,android.net.Uri.parse("tel:")).setPackage(OLAMIDE));}catch(RuntimeException e){toast(R.string.dialer_missing);}});
+        Button profiles=new BiometricGate.GuardedButton(this,gate);profiles.setText(R.string.sip_title);panel.addView(profiles);profiles.setOnClickListener(v->startActivity(new Intent(this,SipProfilesActivity.class)));
         Button defaults=new BiometricGate.GuardedButton(this,gate);defaults.setText(R.string.dialer_defaults);panel.addView(defaults);
         defaults.setOnClickListener(v->startActivity(new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)));
     }

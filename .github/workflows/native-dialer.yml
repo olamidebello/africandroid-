@@ -1,0 +1,35 @@
+name: Build native Olamide SIP dialer
+on:
+  push:
+    paths: ['native-dialer/**', '.github/workflows/native-dialer.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Install Android compile dependencies
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Compile native debug APK
+        run: gradle --no-daemon :app:assembleDebug
+        working-directory: native-dialer
+      - name: Record artifact checksum
+        run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/SHA256SUMS
+        working-directory: native-dialer
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Olamide-native-SIP-debug
+          path: |
+            native-dialer/app/build/outputs/apk/debug/app-debug.apk
+            native-dialer/app/build/outputs/apk/debug/SHA256SUMS
+          if-no-files-found: error
