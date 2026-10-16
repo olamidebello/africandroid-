@@ -103,7 +103,7 @@
     - name: Verify public pages and catalog through local validated HTTPS
       ansible.builtin.command:
         argv: [curl, --fail, --silent, --show-error, --resolve, '{{ website_domain }}:443:127.0.0.1', 'https://{{ website_domain }}{{ item }}']
-      loop: ['/', /catalog.json, /api/health, /api/releases]
+      loop: ['/', /privacy.html, /terms.html, /copyright.html, /catalog.json, /api/health, /api/releases]
       changed_when: false
     - name: Report website deployment
       ansible.builtin.debug:
