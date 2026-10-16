@@ -67,7 +67,7 @@
       ansible.builtin.command:
         argv: [python3, '{{ website_source }}/website/tools/configure-nginx.py', --domain, '{{ website_domain }}', --root, '/var/www/{{ website_domain }}']
       register: website_nginx
-      changed_when: (website_nginx.stdout | from_json).changed
+      changed_when: website_nginx.rc == 0 and (website_nginx.stdout | default('{}', true) | from_json).get('changed', false)
     - name: Validate Nginx before reload
       ansible.builtin.command: nginx -t
       changed_when: false
