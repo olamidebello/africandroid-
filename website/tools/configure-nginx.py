@@ -11,7 +11,7 @@ def configure(domain,root,available=Path('/etc/nginx/sites-available'),enabled=P
   if link.is_file() and re.search(r'\bserver_name\s+[^;]*?(?<![\w.-])'+re.escape(domain)+r'(?=\s|;)',link.read_text()):hits.append(link)
  if len(hits)>1:raise ValueError('More than one enabled Nginx configuration uses this domain; resolve the duplicate first')
  link=hits[0] if hits else enabled/'africandroid-public'
- if hits and not re.fullmatch(r'(?:africandroid-public|olamide-static-[0-9]+)',link.name):raise ValueError('Existing domain vhost is not a recognized managed site; review it before migration')
+ if hits and link.name != domain and not re.fullmatch(r'(?:africandroid-public|olamide-static-[0-9]+)',link.name):raise ValueError('Existing domain vhost is not a recognized managed site; review it before migration')
  target=link.resolve() if hits else available/'africandroid-public'
  previous=target.read_text() if target.exists() else None
  if previous:
