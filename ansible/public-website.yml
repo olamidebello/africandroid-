@@ -1,0 +1,96 @@
+---
+- name: Deploy AfricAndroid public website and APK downloads
+  hosts: web_hosts
+  become: true
+  vars:
+    website_domain: africandroid.world
+    website_acme_email: dobcalldemo@gmail.com
+    website_source: /opt/africandroid-website-source
+    website_revision: main
+  tasks:
+    - name: Require Debian 12 and valid public website values
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution == 'Debian'
+          - ansible_facts.distribution_major_version == '12'
+          - website_domain is match('^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$')
+          - website_acme_email is match('^[^\s@]+@[^\s@]+\.[^\s@]+$')
+    - name: Install website and APK validation prerequisites
+      ansible.builtin.apt:
+        name: [git, curl, python3, nginx, certbot, python3-certbot-nginx, aapt, apksigner, default-jre-headless]
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+    - name: Pull reviewed website source
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africandroid-.git
+        dest: '{{ website_source }}'
+        version: '{{ website_revision }}'
+        force: false
+    - name: Create public website and persistent download directories
+      ansible.builtin.file:
+        path: '{{ item }}'
+        state: directory
+        mode: '0755'
+      loop: ['/var/www/{{ website_domain }}', /var/lib/africandroid-public, /var/lib/africandroid-public/downloads]
+    - name: Install public pages without touching published APKs
+      ansible.builtin.copy:
+        src: '{{ website_source }}/website/public/'
+        dest: '/var/www/{{ website_domain }}/'
+        remote_src: true
+        mode: '0644'
+        directory_mode: '0755'
+    - name: Create empty catalog only on first installation
+      ansible.builtin.copy:
+        src: '{{ website_source }}/website/catalog.empty.json'
+        dest: /var/lib/africandroid-public/catalog.json
+        remote_src: true
+        force: false
+        mode: '0644'
+    - name: Install public download and security configuration
+      ansible.builtin.copy:
+        dest: /etc/nginx/snippets/africandroid-public.conf
+        mode: '0644'
+        content: |
+          add_header X-Content-Type-Options nosniff always;
+          add_header Referrer-Policy strict-origin-when-cross-origin always;
+          add_header Content-Security-Policy "default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'" always;
+          location = /catalog.json { alias /var/lib/africandroid-public/catalog.json; add_header Cache-Control no-store; add_header X-Content-Type-Options nosniff; }
+          location ~ "^/downloads/([a-f0-9]{64}\.apk)$" {
+            alias /var/lib/africandroid-public/downloads/$1;
+            default_type application/vnd.android.package-archive;
+            add_header Content-Disposition attachment;
+            add_header X-Content-Type-Options nosniff;
+          }
+          location /downloads/ { return 404; }
+    - name: Configure isolated domain vhost preserving existing managed TLS
+      ansible.builtin.command:
+        argv: [python3, '{{ website_source }}/website/tools/configure-nginx.py', --domain, '{{ website_domain }}', --root, '/var/www/{{ website_domain }}']
+      register: website_nginx
+      changed_when: (website_nginx.stdout | from_json).changed
+    - name: Validate Nginx before reload
+      ansible.builtin.command: nginx -t
+      changed_when: false
+    - name: Enable and reload Nginx
+      ansible.builtin.systemd:
+        name: nginx
+        enabled: true
+        state: reloaded
+    - name: Obtain or renew website TLS and redirect HTTP
+      ansible.builtin.command:
+        argv: [certbot, --nginx, --non-interactive, --agree-tos, --email, '{{ website_acme_email }}', -d, '{{ website_domain }}', --redirect, --keep-until-expiring]
+      register: website_certbot
+      changed_when: "'no action taken' not in (website_certbot.stdout | lower)"
+    - name: Enable automatic certificate renewal
+      ansible.builtin.systemd:
+        name: certbot.timer
+        enabled: true
+        state: started
+    - name: Verify public pages and catalog through local validated HTTPS
+      ansible.builtin.command:
+        argv: [curl, --fail, --silent, --show-error, --resolve, '{{ website_domain }}:443:127.0.0.1', 'https://{{ website_domain }}{{ item }}']
+      loop: ['/', /catalog.json]
+      changed_when: false
+    - name: Report website deployment
+      ansible.builtin.debug:
+        msg: 'Website: https://{{ website_domain }}. APKs appear only after verified publication; existing downloads are preserved.'

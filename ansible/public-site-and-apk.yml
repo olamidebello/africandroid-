@@ -1,0 +1,5 @@
+---
+- name: Install public website and HTTPS
+  ansible.builtin.import_playbook: public-website.yml
+- name: Build and publish development APK
+  ansible.builtin.import_playbook: build-public-apk.yml

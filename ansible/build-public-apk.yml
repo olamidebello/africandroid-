@@ -1,0 +1,98 @@
+---
+- name: Compile native APK and optionally publish a development download
+  hosts: apk_build_hosts
+  become: true
+  vars:
+    afric_user: africbuilder
+    afric_root: /srv/africandroid
+    afric_repo: https://github.com/olamidebello/africandroid-.git
+    afric_revision: main
+    native_android_sdk: '{{ afric_root }}/android-sdk'
+    native_gradle_path: '{{ afric_root }}/native-tools/gradle-8.13/bin/gradle'
+    provision_native_build_tools: true
+    publish_native_apk: true
+    apk_publication_root: /var/lib/africandroid-public
+  tasks:
+    - name: Validate native APK build host
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution in ['Debian', 'Ubuntu']
+          - ansible_facts.architecture == 'x86_64'
+          - ansible_facts.memtotal_mb | int >= 3800
+          - afric_user != 'root'
+          - afric_user is match('^[a-z_][a-z0-9_-]*$')
+          - afric_root is match('^/[A-Za-z0-9_/-]+$')
+        fail_msg: Native APK build requires a Debian/Ubuntu x86_64 host with at least 4 GB RAM and an unprivileged build user. Full OS images require a separate AOSP host.
+    - name: Install Java and build bootstrap prerequisites
+      ansible.builtin.apt:
+        name: [git, ca-certificates, curl, unzip, python3, sudo, openjdk-17-jdk-headless]
+        update_cache: true
+        cache_valid_time: 3600
+        state: present
+    - name: Create dedicated unprivileged APK build account
+      ansible.builtin.user:
+        name: '{{ afric_user }}'
+        create_home: true
+        shell: /bin/bash
+        password_lock: true
+    - name: Create build directories
+      ansible.builtin.file:
+        path: '{{ afric_root }}/{{ item }}'
+        state: directory
+        owner: '{{ afric_user }}'
+        group: '{{ afric_user }}'
+        mode: '0755'
+      loop: ['', artifacts, native-tools, android-sdk]
+    - name: Require free disk capacity before dependency downloads
+      ansible.builtin.command:
+        argv: [python3, -c, 'import shutil,sys; sys.exit(0 if shutil.disk_usage(sys.argv[1]).free >= 12*1024**3 else "At least 12 GiB free disk space is required")', '{{ afric_root }}']
+      changed_when: false
+    - name: Pull native APK source without discarding local changes
+      ansible.builtin.git:
+        repo: '{{ afric_repo }}'
+        dest: '{{ afric_root }}/project'
+        version: '{{ afric_revision }}'
+        force: false
+      become_user: '{{ afric_user }}'
+      register: apk_checkout
+    - name: Install checksum-validated Android SDK and Gradle then compile debug APK
+      ansible.builtin.include_tasks: native-dialer-build.yml
+    - name: Verify APK and inspect generated signing identity
+      ansible.builtin.command:
+        argv: ['{{ native_android_sdk }}/build-tools/35.0.0/apksigner', verify, --verbose, --print-certs, '{{ afric_root }}/artifacts/OlamideSip.apk']
+      register: built_apk_signature
+      changed_when: false
+    - name: Record build checksum
+      ansible.builtin.copy:
+        dest: '{{ afric_root }}/artifacts/SHA256SUMS'
+        content: '{{ native_apk.stat.checksum }}  OlamideSip.apk{{ "\n" }}'
+        owner: '{{ afric_user }}'
+        group: '{{ afric_user }}'
+        mode: '0644'
+    - name: Publish signature-verified debug APK explicitly as development channel
+      ansible.builtin.command:
+        argv:
+          - python3
+          - '{{ afric_root }}/project/website/tools/publish-apk.py'
+          - --apk
+          - '{{ afric_root }}/artifacts/OlamideSip.apk'
+          - --name
+          - Olamide native SIP dialer
+          - --channel
+          - development
+          - --expected-signer-sha256
+          - '{{ built_apk_signature.stdout | regex_findall("certificate SHA-256 digest: ([a-fA-F0-9]{64})") | first }}'
+          - --source-url
+          - https://github.com/olamidebello/africandroid-/tree/{{ apk_checkout.after }}/native-dialer
+          - --notes
+          - Development/debug APK. Minimum Android 11 (API 30); ARM64 and x86_64. SIP service credentials are required. Compilation does not certify registration, audio, cellular calls or production readiness. Native dialer and linked SDK are AGPL-3.0-or-later; see source and notices.
+          - --output
+          - '{{ apk_publication_root }}'
+          - --aapt
+          - '{{ native_android_sdk }}/build-tools/35.0.0/aapt'
+          - --apksigner
+          - '{{ native_android_sdk }}/build-tools/35.0.0/apksigner'
+      when: publish_native_apk | bool
+    - name: Report generated APK and publication scope
+      ansible.builtin.debug:
+        msg: 'Built {{ afric_root }}/artifacts/OlamideSip.apk. Public development catalog updated: {{ publish_native_apk | bool }}. This is a native app APK, not a complete AfricAndroid OS image. Preserve the build user Android debug keystore for compatible updates.'
