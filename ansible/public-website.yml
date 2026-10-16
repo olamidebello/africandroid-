@@ -40,6 +40,12 @@
         remote_src: true
         mode: '0644'
         directory_mode: '0755'
+    - name: Restore public tree read and directory traversal permissions after copy
+      ansible.builtin.file:
+        path: '/var/www/{{ website_domain }}'
+        state: directory
+        recurse: true
+        mode: 'u=rwX,g=rX,o=rX'
     - name: Create empty catalog only on first installation
       ansible.builtin.copy:
         src: '{{ website_source }}/website/catalog.empty.json'
