@@ -53,6 +53,8 @@
         remote_src: true
         force: false
         mode: '0644'
+    - name: Provision release database and GUI backend
+      ansible.builtin.import_tasks: tasks/public-backend.yml
     - name: Install public download and security configuration
       ansible.builtin.copy:
         dest: /etc/nginx/snippets/africandroid-public.conf
@@ -61,6 +63,12 @@
           add_header X-Content-Type-Options nosniff always;
           add_header Referrer-Policy strict-origin-when-cross-origin always;
           add_header Content-Security-Policy "default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'" always;
+          location /api/ {
+            proxy_pass http://127.0.0.1:8765;
+            proxy_set_header Host $host;
+            proxy_connect_timeout 5s;
+            proxy_read_timeout 30s;
+          }
           location = /catalog.json { alias /var/lib/africandroid-public/catalog.json; add_header Cache-Control no-store; add_header X-Content-Type-Options nosniff; }
           location ~ "^/downloads/([a-f0-9]{64}\.apk)$" {
             alias /var/lib/africandroid-public/downloads/$1;
@@ -95,7 +103,7 @@
     - name: Verify public pages and catalog through local validated HTTPS
       ansible.builtin.command:
         argv: [curl, --fail, --silent, --show-error, --resolve, '{{ website_domain }}:443:127.0.0.1', 'https://{{ website_domain }}{{ item }}']
-      loop: ['/', /catalog.json]
+      loop: ['/', /catalog.json, /api/health, /api/releases]
       changed_when: false
     - name: Report website deployment
       ansible.builtin.debug:

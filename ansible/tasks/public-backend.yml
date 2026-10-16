@@ -1,0 +1,64 @@
+---
+- name: Create isolated public API account
+  ansible.builtin.user:
+    name: africapi
+    system: true
+    home: /nonexistent
+    create_home: false
+    shell: /usr/sbin/nologin
+- name: Create private database directory
+  ansible.builtin.file:
+    path: /var/lib/africandroid-api
+    state: directory
+    owner: africapi
+    group: africapi
+    mode: '0700'
+- name: Create API application directory
+  ansible.builtin.file:
+    path: /opt/africandroid-api
+    state: directory
+    mode: '0755'
+- name: Install public release API
+  ansible.builtin.copy:
+    src: '{{ website_source }}/website/backend/server.py'
+    dest: /opt/africandroid-api/server.py
+    remote_src: true
+    mode: '0644'
+  register: public_api_code
+- name: Install isolated API service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/africandroid-api.service
+    mode: '0644'
+    content: |
+      [Unit]
+      Description=AfricAndroid release catalog API
+      After=network.target
+      [Service]
+      User=africapi
+      Group=africapi
+      ExecStart=/usr/bin/python3 /opt/africandroid-api/server.py
+      Restart=on-failure
+      RestartSec=3
+      UMask=0077
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectSystem=strict
+      ProtectHome=true
+      ReadWritePaths=/var/lib/africandroid-api
+      [Install]
+      WantedBy=multi-user.target
+  register: public_api_unit
+- name: Start or update public API
+  ansible.builtin.systemd:
+    name: africandroid-api
+    daemon_reload: true
+    enabled: true
+    state: "{{ 'restarted' if public_api_code.changed or public_api_unit.changed else 'started' }}"
+- name: Verify database and published catalog
+  ansible.builtin.uri:
+    url: http://127.0.0.1:8765/api/health
+    return_content: true
+  register: public_api_health
+  until: public_api_health.status == 200
+  retries: 5
+  delay: 2
