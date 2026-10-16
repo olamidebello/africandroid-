@@ -16,7 +16,7 @@ def configure(domain,root,available=Path('/etc/nginx/sites-available'),enabled=P
  previous=target.read_text() if target.exists() else None
  if previous:
   names=re.findall(r'\bserver_name\s+([^;]+);',previous)
-  if any(set(value.split())!={domain} for value in names) or 'proxy_pass' in previous:raise ValueError('Refusing to replace a shared/proxied vhost')
+  if any(domain not in value.split() or not set(value.split()).issubset({domain, 'www.'+domain}) for value in names) or 'proxy_pass' in previous:raise ValueError('Refusing to replace a shared/proxied vhost')
   if not re.search(r'\broot\s+[^;]+;',previous):raise ValueError('Existing managed vhost has no document root')
   content=re.sub(r'\broot\s+[^;]+;', 'root '+root+';',previous)
   content=re.sub(r'\n\s*include /etc/nginx/snippets/africandroid-public.conf;','',content)
