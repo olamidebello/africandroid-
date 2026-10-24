@@ -1,0 +1,45 @@
+name: Build AfricAndroid OS
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: africandroid-os-builder
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: [self-hosted, Linux, X64, africandroid-os]
+    timeout-minutes: 1440
+    env:
+      AOSP_DIR: ${{ runner.temp }}/africandroid-os/aosp
+      ARTIFACT_DIR: ${{ runner.temp }}/africandroid-os/artifacts/${{ github.run_id }}-${{ github.run_attempt }}
+      AFRICANBROWSER_ENABLED: 'false'
+      OLAMIDE_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Ubuntu build host
+        shell: bash
+        run: |
+          set -euo pipefail
+          source /etc/os-release
+          [[ "$ID" == ubuntu && ( "$VERSION_ID" == 22.04 || "$VERSION_ID" == 24.04 ) ]]
+          [[ $(id -u) -ne 0 ]]
+          sudo -n true
+      - name: Install dependencies and check capacity
+        run: bash scripts/setup-host.sh
+      - name: Download Android platform
+        run: bash scripts/sync.sh
+      - name: Compile development Cuttlefish OS
+        run: bash scripts/build.sh
+      - name: Record output location
+        if: always()
+        shell: bash
+        run: |
+          echo "OS output directory on runner: $ARTIFACT_DIR" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Target: x86_64 Cuttlefish userdebug; boot testing is separate.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AfricAndroid-OS-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.ARTIFACT_DIR }}/
+          if-no-files-found: error
+          retention-days: 7
