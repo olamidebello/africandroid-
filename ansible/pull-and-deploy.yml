@@ -1,0 +1,6 @@
+---
+# Run with the existing public-local.ini inventory; extra vars override these defaults.
+- name: Deploy website from the pulled repository
+  ansible.builtin.import_playbook: public-website.yml
+  vars:
+    website_domain: africandroid.space
